@@ -40,7 +40,12 @@ export class AirtableStorage implements IStorage {
 
   // Lead methods - using Airtable
   async getLeads(): Promise<Lead[]> {
-    return await airtableService.getLeads();
+    try {
+      return await airtableService.getLeads();
+    } catch (error) {
+      console.error('Error fetching leads, falling back to empty array:', error);
+      return [];
+    }
   }
 
   async getLead(id: string): Promise<Lead | undefined> {

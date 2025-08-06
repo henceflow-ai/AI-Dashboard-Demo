@@ -40,22 +40,30 @@ export class AirtableService {
 
   private async fetchRecords(tableName: string, params?: Record<string, string>): Promise<AirtableRecord[]> {
     try {
-      const url = new URL(`${this.baseUrl}/${tableName}`);
+      // Encode table name for URL
+      const encodedTableName = encodeURIComponent(tableName);
+      const url = new URL(`${this.baseUrl}/${encodedTableName}`);
+      
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
           url.searchParams.append(key, value);
         });
       }
 
+      console.log(`Fetching from Airtable: ${url.toString()}`);
+
       const response = await fetch(url.toString(), {
         headers: this.headers,
       });
 
       if (!response.ok) {
-        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`Airtable API error response:`, errorText);
+        throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data: AirtableResponse = await response.json();
+      console.log(`Successfully fetched ${data.records.length} records from ${tableName}`);
       return data.records;
     } catch (error) {
       console.error(`Error fetching ${tableName}:`, error);
@@ -65,32 +73,59 @@ export class AirtableService {
 
   async getLeads(): Promise<Lead[]> {
     try {
-      const records = await this.fetchRecords('Leads');
+      // Try the specific table name first
+      let records;
+      try {
+        records = await this.fetchRecords('L1 - Enriched Leads');
+      } catch (tableError) {
+        console.log('L1 - Enriched Leads table not found, trying Leads table');
+        records = await this.fetchRecords('Leads');
+      }
       
       return records.map(record => {
         const fields = record.fields;
         return {
           id: record.id,
-          name: fields.Name || fields.name || 'Unknown',
-          email: fields.Email || fields.email || '',
-          phone: fields.Phone || fields.phone || null,
-          company: fields.Company || fields.company || null,
-          status: fields.Status || fields.status || 'new',
-          stage: fields.Stage || fields.stage || 'lead',
-          value: fields.Value || fields.value || null,
-          source: fields.Source || fields.source || null,
-          assignedTo: fields['Assigned To'] || fields.assignedTo || null,
+          name: fields.Name || fields.name || fields['Lead Name'] || 'Unknown',
+          email: fields.Email || fields.email || fields['Email Address'] || '',
+          phone: fields.Phone || fields.phone || fields['Phone Number'] || null,
+          company: fields.Company || fields.company || fields['Company Name'] || null,
+          status: fields.Status || fields.status || fields['Lead Status'] || 'new',
+          stage: fields.Stage || fields.stage || fields['Pipeline Stage'] || 'lead',
+          value: fields.Value || fields.value || fields['Deal Value'] || fields['Potential Value'] || null,
+          source: fields.Source || fields.source || fields['Lead Source'] || null,
+          assignedTo: fields['Assigned To'] || fields.assignedTo || fields['Sales Rep'] || null,
           createdAt: new Date(record.createdTime),
-          updatedAt: new Date(fields['Updated At'] || fields.updatedAt || record.createdTime),
-          lastContactedAt: fields['Last Contacted'] ? new Date(fields['Last Contacted']) : null,
-          notes: fields.Notes || fields.notes || null,
-          metadata: fields.Metadata ? JSON.parse(fields.Metadata) : { priority: fields.Priority || 'medium' }
+          updatedAt: new Date(fields['Updated At'] || fields.updatedAt || fields['Last Modified'] || record.createdTime),
+          lastContactedAt: fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date'] ? 
+            new Date(fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date']) : null,
+          notes: fields.Notes || fields.notes || fields.Comments || null,
+          metadata: this.parseMetadata(fields)
         };
       });
     } catch (error) {
       console.error('Error fetching leads from Airtable:', error);
       return [];
     }
+  }
+
+  private parseMetadata(fields: Record<string, any>) {
+    // Try to parse JSON metadata first
+    if (fields.Metadata) {
+      try {
+        return JSON.parse(fields.Metadata);
+      } catch (e) {
+        // If JSON parsing fails, continue with fallback
+      }
+    }
+    
+    // Create metadata from individual fields
+    return {
+      priority: fields.Priority || fields.priority || fields['Lead Priority'] || 'medium',
+      industry: fields.Industry || fields.industry || null,
+      leadScore: fields['Lead Score'] || fields.leadScore || null,
+      tags: fields.Tags || fields.tags || null
+    };
   }
 
   async getMeetings(): Promise<Meeting[]> {

@@ -24,13 +24,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test Airtable connection
+  app.get("/api/test-airtable", async (req, res) => {
+    try {
+      const apiKey = process.env.AIRTABLE_API_KEY;
+      const baseId = process.env.AIRTABLE_BASE_ID;
+      
+      if (!apiKey || !baseId) {
+        return res.json({ 
+          status: "error", 
+          message: "Missing API credentials",
+          hasApiKey: !!apiKey,
+          hasBaseId: !!baseId
+        });
+      }
+
+      // Test basic API access
+      const baseUrl = `https://api.airtable.com/v0/${baseId}`;
+      const response = await fetch(`${baseUrl}/L1%20-%20Enriched%20Leads?maxRecords=1`, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return res.json({
+          status: "error",
+          statusCode: response.status,
+          message: response.statusText,
+          details: errorText
+        });
+      }
+
+      const data = await response.json();
+      res.json({
+        status: "success",
+        message: "Airtable connection successful",
+        recordCount: data.records?.length || 0,
+        sampleRecord: data.records?.[0] || null
+      });
+    } catch (error) {
+      res.json({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Leads endpoints
   app.get("/api/leads", async (req, res) => {
     try {
       const leads = await storage.getLeads();
       res.json(leads);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch leads" });
+      console.error("Error in /api/leads:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch leads",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
