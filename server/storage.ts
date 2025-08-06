@@ -15,6 +15,7 @@ import {
   type EnrichedActivity
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { airtableService } from "./airtable";
 
 export interface IStorage {
   // User methods
@@ -386,4 +387,9 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { AirtableStorage } from "./airtable-storage";
+
+// Use Airtable storage if API keys are available, otherwise fall back to memory storage
+export const storage = process.env.AIRTABLE_API_KEY && process.env.AIRTABLE_BASE_ID 
+  ? new AirtableStorage() 
+  : new MemStorage();
