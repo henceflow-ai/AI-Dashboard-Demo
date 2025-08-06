@@ -1,0 +1,44 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import AnalyticsOverview from "@/pages/analytics-overview";
+import NotFound from "@/pages/not-found";
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={AnalyticsOverview} />
+      {/* Placeholder routes for future pages */}
+      <Route path="/leads" component={NotFound} />
+      <Route path="/pipeline" component={NotFound} />
+      <Route path="/meetings" component={NotFound} />
+      <Route path="/campaigns" component={NotFound} />
+      <Route path="/assistant" component={NotFound} />
+      <Route path="/automation" component={NotFound} />
+      {/* Fallback to 404 */}
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="dashboard-theme">
+        <TooltipProvider>
+          <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900" data-testid="app-container">
+            <Sidebar />
+            <Router />
+          </div>
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
