@@ -6,14 +6,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import AnalyticsOverview from "@/pages/analytics-overview";
+import LeadInsights from "@/pages/lead-insights";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={AnalyticsOverview} />
+      <Route path="/leads" component={LeadInsights} />
       {/* Placeholder routes for future pages */}
-      <Route path="/leads" component={NotFound} />
       <Route path="/pipeline" component={NotFound} />
       <Route path="/meetings" component={NotFound} />
       <Route path="/campaigns" component={NotFound} />
