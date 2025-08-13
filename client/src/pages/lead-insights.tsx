@@ -279,12 +279,6 @@ export default function LeadInsights() {
                     </p>
                     <div className="flex items-center space-x-2 mt-2">
                       <Badge 
-                        className={`${getStatusColor(selectedLead.status)}`}
-                        data-testid="selected-lead-status"
-                      >
-                        {selectedLead.status.replace('_', ' ')}
-                      </Badge>
-                      <Badge 
                         className={`${getStageColor(selectedLead.stage)}`}
                         data-testid="selected-lead-stage"
                       >
