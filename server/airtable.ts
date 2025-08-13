@@ -84,23 +84,34 @@ export class AirtableService {
       
       return records.map(record => {
         const fields = record.fields;
+        
+        // Log the actual field structure for debugging
+        console.log('Airtable record fields:', Object.keys(fields));
+        console.log('Sample field data:', fields);
+        
+        // Combine first name and last name for full name
+        const firstName = fields['first name'] || fields['First Name'] || fields.firstName || '';
+        const lastName = fields['last name'] || fields['Last Name'] || fields.lastName || '';
+        const fullName = [firstName, lastName].filter(Boolean).join(' ') || 
+                        fields.Name || fields.name || fields['Lead Name'] || 'Unknown';
+        
         return {
           id: record.id,
-          name: fields.Name || fields.name || fields['Lead Name'] || 'Unknown',
-          email: fields.Email || fields.email || fields['Email Address'] || '',
-          phone: fields.Phone || fields.phone || fields['Phone Number'] || null,
-          company: fields.Company || fields.company || fields['Company Name'] || null,
-          status: fields.Status || fields.status || fields['Lead Status'] || 'new',
-          stage: fields.Stage || fields.stage || fields['Pipeline Stage'] || 'lead',
-          value: fields.Value || fields.value || fields['Deal Value'] || fields['Potential Value'] || null,
-          source: fields.Source || fields.source || fields['Lead Source'] || null,
-          assignedTo: fields['Assigned To'] || fields.assignedTo || fields['Sales Rep'] || null,
+          name: fullName,
+          email: fields.Email || fields.email || fields['Email Address'] || fields['email address'] || '',
+          phone: fields.Phone || fields.phone || fields['Phone Number'] || fields['phone number'] || null,
+          company: fields.Company || fields.company || fields['Company Name'] || fields['company name'] || null,
+          status: fields.Status || fields.status || fields['Lead Status'] || fields['lead status'] || 'new',
+          stage: fields.Stage || fields.stage || fields['Pipeline Stage'] || fields['pipeline stage'] || 'lead',
+          value: fields.Value || fields.value || fields['Deal Value'] || fields['deal value'] || fields['Potential Value'] || null,
+          source: fields.Source || fields.source || fields['Lead Source'] || fields['lead source'] || null,
+          assignedTo: fields['Assigned To'] || fields.assignedTo || fields['Sales Rep'] || fields['sales rep'] || null,
           createdAt: new Date(record.createdTime),
-          updatedAt: new Date(fields['Updated At'] || fields.updatedAt || fields['Last Modified'] || record.createdTime),
-          lastContactedAt: fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date'] ? 
-            new Date(fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date']) : null,
-          notes: fields.Notes || fields.notes || fields.Comments || null,
-          metadata: this.parseMetadata(fields)
+          updatedAt: new Date(fields['Updated At'] || fields.updatedAt || fields['Last Modified'] || fields['last modified'] || record.createdTime),
+          lastContactedAt: fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date'] || fields['last contact date'] ? 
+            new Date(fields['Last Contacted'] || fields.lastContactedAt || fields['Last Contact Date'] || fields['last contact date']) : null,
+          notes: fields.Notes || fields.notes || fields.Comments || fields.comments || null,
+          metadata: this.parseMetadata(fields, firstName, lastName)
         };
       });
     } catch (error) {
@@ -109,7 +120,7 @@ export class AirtableService {
     }
   }
 
-  private parseMetadata(fields: Record<string, any>) {
+  private parseMetadata(fields: Record<string, any>, firstName?: string, lastName?: string) {
     // Try to parse JSON metadata first
     if (fields.Metadata) {
       try {
@@ -119,13 +130,25 @@ export class AirtableService {
       }
     }
     
-    // Create metadata from individual fields
-    return {
-      priority: fields.Priority || fields.priority || fields['Lead Priority'] || 'medium',
+    // Create metadata from individual fields and include all available data
+    const metadata: any = {
+      priority: fields.Priority || fields.priority || fields['Lead Priority'] || fields['lead priority'] || 'medium',
       industry: fields.Industry || fields.industry || null,
-      leadScore: fields['Lead Score'] || fields.leadScore || null,
-      tags: fields.Tags || fields.tags || null
+      leadScore: fields['Lead Score'] || fields.leadScore || fields['lead score'] || null,
+      tags: fields.Tags || fields.tags || null,
+      firstName: firstName || null,
+      lastName: lastName || null
     };
+    
+    // Add any other fields that might be useful
+    Object.keys(fields).forEach(key => {
+      const lowerKey = key.toLowerCase().replace(/\s+/g, '_');
+      if (!metadata[lowerKey] && !['first name', 'last name', 'email', 'phone', 'company', 'status', 'stage', 'value', 'source'].includes(key.toLowerCase())) {
+        metadata[lowerKey] = fields[key];
+      }
+    });
+    
+    return metadata;
   }
 
   async getMeetings(): Promise<Meeting[]> {

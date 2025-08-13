@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Search, 
   Filter, 
@@ -29,9 +30,11 @@ export default function LeadInsights() {
   const { theme, toggleTheme } = useTheme();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
 
-  const { data: leads, isLoading } = useQuery<Lead[]>({
+  const { data: leads, isLoading, refetch } = useQuery<Lead[]>({
     queryKey: ["/api/leads"],
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
   const filteredLeads = leads?.filter(lead => 
@@ -334,10 +337,27 @@ export default function LeadInsights() {
 
                 {/* Lead Details */}
                 <Card className="bg-white dark:bg-slate-800" data-testid="lead-details-card">
-                  <CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-lg text-slate-900 dark:text-white">Lead Details</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => refetch()}>
+                      Refresh Data
+                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {(selectedLead.metadata as any)?.firstName && (
+                      <div className="flex items-center space-x-3" data-testid="lead-firstname">
+                        <User className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">First Name</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as any).firstName}</span>
+                      </div>
+                    )}
+                    {(selectedLead.metadata as any)?.lastName && (
+                      <div className="flex items-center space-x-3" data-testid="lead-lastname">
+                        <User className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">Last Name</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as any).lastName}</span>
+                      </div>
+                    )}
                     <div className="flex items-center space-x-3" data-testid="lead-created">
                       <Calendar className="h-4 w-4 text-slate-400" />
                       <span className="text-sm text-slate-600 dark:text-slate-400">Created</span>
@@ -386,6 +406,36 @@ export default function LeadInsights() {
                     <p className="text-sm text-slate-600 dark:text-slate-400" data-testid="lead-notes">
                       {selectedLead.notes}
                     </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* All Airtable Data - Dynamic Display */}
+              {selectedLead.metadata && Object.keys(selectedLead.metadata).length > 0 && (
+                <Card className="bg-white dark:bg-slate-800" data-testid="airtable-data-card">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-slate-900 dark:text-white">All Airtable Data</CardTitle>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Live data from your L1 - Enriched Leads table
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {Object.entries(selectedLead.metadata)
+                        .filter(([key, value]) => value !== null && value !== undefined && value !== '')
+                        .map(([key, value]) => (
+                          <div key={key} className="flex items-start space-x-3" data-testid={`metadata-${key}`}>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                                {key.replace(/_/g, ' ')}
+                              </p>
+                              <p className="text-sm font-medium text-slate-900 dark:text-white mt-1 break-words">
+                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </CardContent>
                 </Card>
               )}
