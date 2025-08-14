@@ -309,7 +309,7 @@ export default function NurtureCampaigns() {
                 <div className="flex items-center justify-between text-sm">
                   <div>
                     <p className="text-slate-500">Target</p>
-                    <Badge className={getSegmentColor(campaign.targetSegment)} variant="outline" size="sm">
+                    <Badge className={getSegmentColor(campaign.targetSegment)} variant="outline">
                       {campaign.targetSegment}
                     </Badge>
                   </div>
