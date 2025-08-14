@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import AnalyticsOverview from "@/pages/analytics-overview";
 import LeadInsights from "@/pages/lead-insights";
+import PipelineStages from "@/pages/pipeline-stages";
 import AirtableTest from "@/pages/airtable-test";
 import NotFound from "@/pages/not-found";
 
@@ -17,7 +18,7 @@ function Router() {
       <Route path="/leads" component={LeadInsights} />
       <Route path="/test-airtable" component={AirtableTest} />
       {/* Placeholder routes for future pages */}
-      <Route path="/pipeline" component={NotFound} />
+      <Route path="/pipeline" component={PipelineStages} />
       <Route path="/meetings" component={NotFound} />
       <Route path="/campaigns" component={NotFound} />
       <Route path="/assistant" component={NotFound} />
