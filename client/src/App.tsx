@@ -9,6 +9,7 @@ import AnalyticsOverview from "@/pages/analytics-overview";
 import LeadInsights from "@/pages/lead-insights";
 import PipelineStages from "@/pages/pipeline-stages";
 import MeetingsView from "@/pages/meetings-view";
+import NurtureCampaigns from "@/pages/nurture-campaigns";
 import AirtableTest from "@/pages/airtable-test";
 import NotFound from "@/pages/not-found";
 
@@ -21,7 +22,7 @@ function Router() {
       {/* Placeholder routes for future pages */}
       <Route path="/pipeline" component={PipelineStages} />
       <Route path="/meetings" component={MeetingsView} />
-      <Route path="/campaigns" component={NotFound} />
+      <Route path="/campaigns" component={NurtureCampaigns} />
       <Route path="/assistant" component={NotFound} />
       <Route path="/automation" component={NotFound} />
       {/* Fallback to 404 */}
