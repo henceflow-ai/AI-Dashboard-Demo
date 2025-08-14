@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import AnalyticsOverview from "@/pages/analytics-overview";
 import LeadInsights from "@/pages/lead-insights";
 import PipelineStages from "@/pages/pipeline-stages";
+import MeetingsView from "@/pages/meetings-view";
 import AirtableTest from "@/pages/airtable-test";
 import NotFound from "@/pages/not-found";
 
@@ -19,7 +20,7 @@ function Router() {
       <Route path="/test-airtable" component={AirtableTest} />
       {/* Placeholder routes for future pages */}
       <Route path="/pipeline" component={PipelineStages} />
-      <Route path="/meetings" component={NotFound} />
+      <Route path="/meetings" component={MeetingsView} />
       <Route path="/campaigns" component={NotFound} />
       <Route path="/assistant" component={NotFound} />
       <Route path="/automation" component={NotFound} />

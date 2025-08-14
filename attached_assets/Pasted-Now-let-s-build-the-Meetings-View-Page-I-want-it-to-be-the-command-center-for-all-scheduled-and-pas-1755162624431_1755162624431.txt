@@ -1,0 +1,48 @@
+Now let's build the Meetings View Page. I want it to be the command center for all scheduled and past meetings—but without looking like just another boring calendar. Here’s how we can make it clean, functional, and visually distinct:
+
+1. Top Bar / Filters
+Date Range Selector → View meetings for Today, This Week, This Month, or Custom Dates.
+Status Filter → Upcoming, Completed, No-Show, Rescheduled, Cancelled.
+Search Bar → Search by lead name, company, or meeting title.
+
+2. Primary Layout:
+Two switchable views for versatility:
+
+A. Calendar View (Visual Scheduling):
+- Interactive calendar (month, week, day view toggle).
+- Color-coded events by lead score.
+- Clicking on a meeting opens a meeting details panel with:
+   - Lead profile
+   - Purpose of meeting
+   - Notes from AI call
+   - Pre-meeting recommended talking points
+   - Attached proposal/case study files
+
+B. Table/List View (Compact & Data-Friendly)
+Columns:
+- Date & Time
+- Lead Name + Company
+- Lead Quality (Hot/Warm/Cold tag)
+- Meeting Type (Intro Call, Demo, Negotiation, etc.)
+- Outcome (Scheduled, Completed, No-Show, etc.)
+- Action Buttons → View Details | Reschedule | Mark Completed
+
+3. Meeting Details Drawer (Side Panel)
+When we click a meeting:
+- Lead Information Summary: Name, company, industry, contact, Pipeline stage
+- Meeting Agenda: Prepared by AI based on lead’s needs & past interactions
+- AI Insights & Recommendations:: Key pain points from calls/emails, Likely objections & suggested responses
+
+4. Performance Metrics Section (Optional, Bottom of Page)
+Show trends like:
+- Meetings booked per week
+- Show rate (%)
+- Conversion rate from meeting to next stage
+This gives quick health checks without switching to Analytics Overview.
+
+Design Approach:
+- Keep it visually light—white/neutral background with bold accent colors for statuses.
+- Make calendar and table view toggle obvious so users feel in control.
+- Add "Today’s Meetings" highlight card at the top for fast access.
+
+Note - Do not pull data from the Airtable now, just make the front-end with mockup data. Connect the backend airtable to pull data only when I say, not now.
