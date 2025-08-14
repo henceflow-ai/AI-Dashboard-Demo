@@ -4,6 +4,18 @@
 
 This is a modern React-based AI sales automation dashboard built with a full-stack architecture. The application provides a comprehensive interface for managing sales leads, tracking pipeline performance, scheduling meetings, and monitoring AI-driven sales activities. It features a clean, responsive design using shadcn/ui components and includes real-time analytics and automation controls for sales teams.
 
+## Recent Changes (January 2025)
+
+### Completed Dashboard Pages:
+- **Lead Insights**: Connected to Airtable 'L1 - Enriched Leads' table with real-time sync
+- **Pipeline Stages**: Interactive 8-stage journey map with conversion funnel visualization  
+- **Meetings View**: Command center with calendar/table views and performance metrics
+- **Nurture Campaigns**: Campaign management with journey flow and performance analytics
+- **AI Assistant**: Chat interface with context suggestions and voice interaction panel
+- **Automation Control Center**: Mission-control style automation management with status board, flow visualizer, and trigger controls
+
+All pages use professional B2B design with mock data and are ready for backend integration when requested.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

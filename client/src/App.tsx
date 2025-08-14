@@ -11,6 +11,7 @@ import PipelineStages from "@/pages/pipeline-stages";
 import MeetingsView from "@/pages/meetings-view";
 import NurtureCampaigns from "@/pages/nurture-campaigns";
 import AIAssistant from "@/pages/ai-assistant";
+import AutomationControl from "@/pages/automation-control";
 import AirtableTest from "@/pages/airtable-test";
 import NotFound from "@/pages/not-found";
 
@@ -25,7 +26,7 @@ function Router() {
       <Route path="/meetings" component={MeetingsView} />
       <Route path="/campaigns" component={NurtureCampaigns} />
       <Route path="/assistant" component={AIAssistant} />
-      <Route path="/automation" component={NotFound} />
+      <Route path="/automation" component={AutomationControl} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
