@@ -10,6 +10,7 @@ import LeadInsights from "@/pages/lead-insights";
 import PipelineStages from "@/pages/pipeline-stages";
 import MeetingsView from "@/pages/meetings-view";
 import NurtureCampaigns from "@/pages/nurture-campaigns";
+import AIAssistant from "@/pages/ai-assistant";
 import AirtableTest from "@/pages/airtable-test";
 import NotFound from "@/pages/not-found";
 
@@ -23,7 +24,7 @@ function Router() {
       <Route path="/pipeline" component={PipelineStages} />
       <Route path="/meetings" component={MeetingsView} />
       <Route path="/campaigns" component={NurtureCampaigns} />
-      <Route path="/assistant" component={NotFound} />
+      <Route path="/assistant" component={AIAssistant} />
       <Route path="/automation" component={NotFound} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
