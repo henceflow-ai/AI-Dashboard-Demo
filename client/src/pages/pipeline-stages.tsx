@@ -215,49 +215,89 @@ export default function PipelineStages() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center space-y-2 py-4">
-                {funnelData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="relative cursor-pointer group"
-                    onMouseEnter={() => setHoveredFunnelStage(item.stage)}
-                    onMouseLeave={() => setHoveredFunnelStage(null)}
-                    onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
-                  >
-                    {/* Funnel Shape */}
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 group-hover:opacity-80 relative flex items-center justify-center text-white font-medium text-sm"
-                      style={{
-                        width: `${Math.max(item.percentage * 3, 120)}px`,
-                        height: '60px',
-                        clipPath: index === funnelData.length - 1 
-                          ? 'polygon(10% 0%, 90% 0%, 90% 100%, 10% 100%)'  // Rectangle for last item
-                          : 'polygon(15% 0%, 85% 0%, 90% 100%, 10% 100%)', // Trapezoid for others
-                        backgroundColor: `hsl(${220 + index * 20}, 70%, ${60 - index * 5}%)`
-                      }}
-                    >
-                      <div className="text-center px-2">
-                        <div className="font-bold text-lg">{item.count}</div>
-                        <div className="text-xs opacity-90 truncate">{item.stage}</div>
-                      </div>
-                    </div>
+              <div className="flex flex-col items-center py-8 px-4">
+                <div className="relative">
+                  {funnelData.map((item, index) => {
+                    // Calculate width based on percentage, with smooth tapering
+                    const baseWidth = 300;
+                    const width = Math.max(baseWidth * (item.percentage / 100), 80);
                     
-                    {/* Hover Tooltip */}
-                    {hoveredFunnelStage === item.stage && (
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-10">
-                        <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 rounded-lg text-xs font-medium shadow-lg">
-                          {item.count} leads ({item.percentage.toFixed(1)}%)
-                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-100 rotate-45"></div>
+                    // Define gradient colors that match the attached image
+                    const gradients = [
+                      'from-yellow-300 via-yellow-400 to-orange-400', // Top - yellow to orange
+                      'from-orange-400 via-orange-500 to-red-400',    // Orange to red
+                      'from-red-400 via-pink-500 to-pink-600',        // Red to pink
+                      'from-pink-500 via-purple-500 to-purple-600',   // Pink to purple
+                      'from-purple-500 via-blue-500 to-blue-600',     // Purple to blue
+                      'from-blue-500 via-cyan-500 to-green-500'       // Blue to green
+                    ];
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="relative cursor-pointer group"
+                        onMouseEnter={() => setHoveredFunnelStage(item.stage)}
+                        onMouseLeave={() => setHoveredFunnelStage(null)}
+                        onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
+                        style={{
+                          marginBottom: index < funnelData.length - 1 ? '8px' : '0'
+                        }}
+                      >
+                        {/* Funnel Layer */}
+                        <div
+                          className={`bg-gradient-to-r ${gradients[index]} transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg relative flex items-center justify-center text-white font-medium shadow-lg`}
+                          style={{
+                            width: `${width}px`,
+                            height: '50px',
+                            clipPath: index === 0 
+                              ? 'polygon(8% 0%, 92% 0%, 88% 100%, 12% 100%)' // Widest at top
+                              : index === funnelData.length - 1
+                              ? 'polygon(25% 0%, 75% 0%, 70% 100%, 30% 100%)' // Narrowest at bottom
+                              : 'polygon(15% 0%, 85% 0%, 80% 100%, 20% 100%)', // Progressive narrowing
+                            filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))',
+                          }}
+                        >
+                          <div className="text-center px-3">
+                            <div className="font-bold text-lg">{item.count}</div>
+                            <div className="text-xs opacity-90 truncate max-w-[200px]">
+                              {item.stage.length > 20 ? item.stage.split(' ').slice(0, 2).join(' ') : item.stage}
+                            </div>
+                          </div>
                         </div>
+                        
+                        {/* Enhanced Hover Tooltip */}
+                        {hoveredFunnelStage === item.stage && (
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 z-20">
+                            <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-lg text-sm font-medium shadow-xl border border-slate-200 dark:border-slate-700">
+                              <div className="font-semibold">{item.stage}</div>
+                              <div className="text-xs opacity-90 mt-1">
+                                {item.count} leads ({item.percentage.toFixed(1)}% conversion)
+                              </div>
+                              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900 dark:bg-slate-100 rotate-45"></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    
-                    {/* Connection Arrow */}
-                    {index < funnelData.length - 1 && (
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-slate-300 dark:border-t-slate-600"></div>
-                    )}
+                    );
+                  })}
+                  
+                  {/* Subtle connecting elements */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {funnelData.slice(0, -1).map((_, index) => (
+                      <div
+                        key={index}
+                        className="absolute bg-gradient-to-b from-transparent via-slate-200/30 to-transparent"
+                        style={{
+                          top: `${(index + 1) * 58 - 4}px`,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '2px',
+                          height: '8px',
+                        }}
+                      />
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </CardContent>
           </Card>
