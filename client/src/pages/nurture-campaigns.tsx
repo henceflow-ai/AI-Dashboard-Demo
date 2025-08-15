@@ -187,7 +187,10 @@ export default function NurtureCampaigns() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              New Campaign
+            </Button>
             <Button variant="ghost" size="sm" onClick={toggleTheme} className="p-2">
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
@@ -228,7 +231,7 @@ export default function NurtureCampaigns() {
                 <Mail className="h-5 w-5 text-orange-600" />
                 <div>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">{avgOpenRate.toFixed(1)}%</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Avg Response Rate</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Avg Open Rate</p>
                 </div>
               </div>
             </CardContent>

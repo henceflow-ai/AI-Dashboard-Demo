@@ -200,7 +200,10 @@ export default function AutomationControl() {
       <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg">
+                <Bot className="h-6 w-6 text-white" />
+              </div>
               Automation Control Center
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">

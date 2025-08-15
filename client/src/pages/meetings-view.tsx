@@ -175,10 +175,10 @@ export default function MeetingsView() {
             </Button>
             <div className="ml-4 lg:ml-0">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Meetings View
+                Meetings Command Center
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Comprehensive meeting management and analytics
+                Manage all scheduled and past meetings
               </p>
             </div>
           </div>
@@ -189,10 +189,10 @@ export default function MeetingsView() {
       </header>
 
       <div className="p-6 space-y-6">
-        {/* Today's Meetings Highlight - Professional Style */}
-        <Card className="bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 shadow-sm">
+        {/* Today's Meetings Highlight */}
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <CardTitle className="text-lg text-blue-900 dark:text-blue-100 flex items-center gap-2">
               <CalendarIcon className="h-5 w-5" />
               Today's Meetings
             </CardTitle>
@@ -220,7 +220,7 @@ export default function MeetingsView() {
                 ))}
               </div>
             ) : (
-              <p className="text-slate-600 dark:text-slate-400">No meetings scheduled for today</p>
+              <p className="text-blue-700 dark:text-blue-300">No meetings scheduled for today</p>
             )}
           </CardContent>
         </Card>
@@ -252,8 +252,6 @@ export default function MeetingsView() {
                 <SelectItem value="no-show">No-Show</SelectItem>
                 <SelectItem value="rescheduled">Rescheduled</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="follow-up">Follow Up Required</SelectItem>
               </SelectContent>
             </Select>
 

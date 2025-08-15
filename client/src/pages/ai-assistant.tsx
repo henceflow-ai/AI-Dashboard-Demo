@@ -203,8 +203,11 @@ export default function AIAssistant() {
               <Menu className="h-5 w-5" />
             </Button>
             <div className="ml-4 lg:ml-0">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                AI Expert Assistant
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <Bot className="h-6 w-6 text-white" />
+                </div>
+                AI Sales Assistant
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Your intelligent sales automation partner

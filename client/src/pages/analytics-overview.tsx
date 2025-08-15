@@ -76,7 +76,7 @@ export default function AnalyticsOverview() {
             </Button>
             <div className="ml-4 lg:ml-0">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white" data-testid="page-title">
-                AI Sales Dashboard
+                Analytics Overview
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400" data-testid="page-subtitle">
                 Monitor your AI automation performance

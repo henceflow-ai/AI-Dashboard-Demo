@@ -18,7 +18,7 @@ const navigation = [
   { name: "Pipeline Stages", href: "/pipeline", icon: Filter },
   { name: "Meetings View", href: "/meetings", icon: Calendar },
   { name: "Nurture Campaigns", href: "/campaigns", icon: Mail },
-  { name: "AI Expert Assistant", href: "/assistant", icon: Brain },
+  { name: "AI Assistant", href: "/assistant", icon: Brain },
   { name: "Automation Control Center", href: "/automation", icon: Settings },
 ];
 

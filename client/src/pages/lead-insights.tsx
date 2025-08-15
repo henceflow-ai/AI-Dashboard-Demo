@@ -236,12 +236,22 @@ export default function LeadInsights() {
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate" data-testid={`lead-name-${index}`}>
                       {lead.name}
                     </p>
-                    {/* Removed Priority star as requested */}
+                    {(lead.metadata as any)?.priority === "high" && (
+                      <Star className="h-3 w-3 text-amber-500 ml-1" data-testid={`lead-priority-${index}`} />
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate" data-testid={`lead-company-${index}`}>
                     {lead.company || "No company"}
                   </p>
-                  {/* Removed badges as requested */}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs ${getStatusColor(lead.status)}`}
+                      data-testid={`lead-status-${index}`}
+                    >
+                      {lead.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             ))}
@@ -267,11 +277,18 @@ export default function LeadInsights() {
                     <p className="text-slate-600 dark:text-slate-400" data-testid="selected-lead-company">
                       {selectedLead.company || "No company"}
                     </p>
-                    {/* Removed badges as requested */}
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Badge 
+                        className={`${getStageColor(selectedLead.stage)}`}
+                        data-testid="selected-lead-stage"
+                      >
+                        {selectedLead.stage}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => refetch()} data-testid="refresh-data-button">
-                  Refresh Data
+                <Button variant="outline" data-testid="edit-lead-button">
+                  Edit
                 </Button>
               </div>
 
@@ -314,8 +331,11 @@ export default function LeadInsights() {
 
                 {/* Lead Details */}
                 <Card className="bg-white dark:bg-slate-800" data-testid="lead-details-card">
-                  <CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-lg text-slate-900 dark:text-white">Lead Details</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => refetch()}>
+                      Refresh Data
+                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {(selectedLead.metadata as any)?.firstName && (
@@ -334,7 +354,7 @@ export default function LeadInsights() {
                     )}
                     <div className="flex items-center space-x-3" data-testid="lead-created">
                       <Calendar className="h-4 w-4 text-slate-400" />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Lead Arrived Date</span>
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Created</span>
                       <span className="text-sm font-medium text-slate-900 dark:text-white">
                         {formatDate(selectedLead.createdAt)}
                       </span>
@@ -357,7 +377,15 @@ export default function LeadInsights() {
                         </span>
                       </div>
                     )}
-                    {/* Removed Priority as requested */}
+                    {(selectedLead.metadata as any)?.priority && (
+                      <div className="flex items-center space-x-3" data-testid="lead-priority">
+                        <Star className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">Priority</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white capitalize">
+                          {(selectedLead.metadata as any).priority}
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -380,22 +408,22 @@ export default function LeadInsights() {
               {selectedLead.metadata && Object.keys(selectedLead.metadata).length > 0 && (
                 <Card className="bg-white dark:bg-slate-800" data-testid="airtable-data-card">
                   <CardHeader>
-                    <CardTitle className="text-lg text-slate-900 dark:text-white">Complete Lead Information</CardTitle>
+                    <CardTitle className="text-lg text-slate-900 dark:text-white">All Airtable Data</CardTitle>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       Live data from your L1 - Enriched Leads table
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {Object.entries(selectedLead.metadata)
-                        .filter(([key, value]) => value !== null && value !== undefined && value !== '' && key !== 'Summary')
+                        .filter(([key, value]) => value !== null && value !== undefined && value !== '')
                         .map(([key, value]) => (
-                          <div key={key} className="flex items-start justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700" data-testid={`metadata-${key}`}>
+                          <div key={key} className="flex items-start space-x-3" data-testid={`metadata-${key}`}>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                                 {key.replace(/_/g, ' ')}
                               </p>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 break-words leading-relaxed">
+                              <p className="text-sm font-medium text-slate-900 dark:text-white mt-1 break-words">
                                 {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                               </p>
                             </div>
