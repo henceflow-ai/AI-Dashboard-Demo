@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -175,7 +175,7 @@ export default function MeetingsView() {
             </Button>
             <div className="ml-4 lg:ml-0">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Meetings Command Center
+                Meetings View
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Manage all scheduled and past meetings
@@ -356,8 +356,8 @@ export default function MeetingsView() {
                               </td>
                               <td className="p-4">
                                 <div className="flex items-center space-x-2">
-                                  <Sheet>
-                                    <SheetTrigger asChild>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
                                       <Button 
                                         variant="ghost" 
                                         size="sm"
@@ -365,14 +365,11 @@ export default function MeetingsView() {
                                       >
                                         <Eye className="h-4 w-4" />
                                       </Button>
-                                    </SheetTrigger>
-                                    <SheetContent className="w-[600px] max-w-[90vw]">
-                                      <MeetingDetailsDrawer meeting={selectedMeeting} />
-                                    </SheetContent>
-                                  </Sheet>
-                                  <Button variant="ghost" size="sm">
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                      <MeetingDetailsPopup meeting={selectedMeeting} />
+                                    </DialogContent>
+                                  </Dialog>
                                   {meeting.status === "Scheduled" && (
                                     <Button variant="ghost" size="sm">
                                       <CheckCircle className="h-4 w-4" />
@@ -472,34 +469,7 @@ export default function MeetingsView() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Upcoming</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {upcomingMeetings.slice(0, 3).map((meeting) => (
-                    <div key={meeting.id} className="flex items-center space-x-3 p-2 border border-slate-200 dark:border-slate-700 rounded">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {meeting.lead.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                          {meeting.lead.name}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {isToday(parseISO(meeting.date)) ? "Today" : 
-                           isTomorrow(parseISO(meeting.date)) ? "Tomorrow" :
-                           format(parseISO(meeting.date), "MMM d")}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
@@ -507,15 +477,15 @@ export default function MeetingsView() {
   );
 }
 
-// Meeting Details Drawer Component
-function MeetingDetailsDrawer({ meeting }: { meeting: typeof mockMeetings[0] | null }) {
+// Meeting Details Popup Component
+function MeetingDetailsPopup({ meeting }: { meeting: typeof mockMeetings[0] | null }) {
   if (!meeting) return null;
 
   return (
     <div className="space-y-6">
-      <SheetHeader>
-        <SheetTitle className="text-xl">Meeting Details</SheetTitle>
-      </SheetHeader>
+      <DialogHeader>
+        <DialogTitle className="text-xl">Meeting Details</DialogTitle>
+      </DialogHeader>
 
       {/* Lead Information */}
       <Card>
