@@ -119,9 +119,9 @@ export default function PipelineStages() {
           </CardHeader>
           <CardContent>
             <div className="relative">
-              {/* Progress Line */}
-              <div className="absolute top-8 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
-              <div className="absolute top-8 left-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full" style={{ width: '60%' }} />
+              {/* Progress Line - Professional Style */}
+              <div className="absolute top-8 left-0 right-0 h-2 bg-slate-200 dark:bg-slate-700 rounded-full shadow-inner" />
+              <div className="absolute top-8 left-0 h-2 bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 rounded-full shadow-md" style={{ width: '60%' }} />
               
               {/* Stage Nodes */}
               <div className="relative flex justify-between items-start">
