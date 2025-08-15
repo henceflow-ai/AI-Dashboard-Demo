@@ -216,165 +216,134 @@ export default function PipelineStages() {
             </CardHeader>
             <CardContent>
               <div className="relative flex items-center justify-center py-8 px-4">
-                {/* Main Funnel Shape */}
+                {/* Main Funnel Shape - Inspired by the attached design */}
                 <div className="relative">
-                  <svg width="400" height="500" viewBox="0 0 400 500" className="overflow-visible">
-                    {/* Funnel sections from top to bottom */}
+                  <svg width="500" height="400" viewBox="0 0 500 400" className="overflow-visible">
+                    {/* Define the funnel shape with clean sections */}
                     {funnelData.map((item, index) => {
                       const colors = [
-                        '#14B8A6', // Teal
-                        '#06B6D4', // Cyan  
-                        '#10B981', // Emerald
-                        '#F59E0B', // Amber
-                        '#EF4444', // Red
-                        '#EC4899'  // Pink
+                        '#FCD34D', // Yellow (top)
+                        '#34D399', // Green
+                        '#60A5FA', // Blue
+                        '#F87171', // Red/Pink (bottom)
+                        '#A78BFA', // Purple
+                        '#FB7185'  // Pink
                       ];
                       
-                      const topWidth = 320 - (index * 45);
-                      const bottomWidth = 320 - ((index + 1) * 45);
-                      const height = 60;
-                      const yPos = index * 55;
+                      // Calculate positions for clean funnel shape
+                      let topWidth, bottomWidth, height, yPos;
+                      
+                      if (index === 0) { // Top section - widest
+                        topWidth = 350;
+                        bottomWidth = 300;
+                        height = 80;
+                        yPos = 20;
+                      } else if (index === 1) { // Second section
+                        topWidth = 300;
+                        bottomWidth = 220;
+                        height = 70;
+                        yPos = 100;
+                      } else if (index === 2) { // Third section
+                        topWidth = 220;
+                        bottomWidth = 140;
+                        height = 60;
+                        yPos = 170;
+                      } else if (index === 3) { // Fourth section - narrow funnel
+                        topWidth = 140;
+                        bottomWidth = 60;
+                        height = 50;
+                        yPos = 230;
+                      } else { // Bottom sections get smaller
+                        topWidth = 60 - ((index - 4) * 10);
+                        bottomWidth = Math.max(40 - ((index - 4) * 8), 30);
+                        height = 40;
+                        yPos = 280 + ((index - 4) * 35);
+                      }
                       
                       return (
                         <g key={index}>
-                          {/* Funnel Section */}
+                          {/* Funnel Section with border */}
                           <path
-                            d={`M ${200 - topWidth/2} ${yPos} 
-                                L ${200 + topWidth/2} ${yPos} 
-                                L ${200 + bottomWidth/2} ${yPos + height} 
-                                L ${200 - bottomWidth/2} ${yPos + height} Z`}
+                            d={`M ${250 - topWidth/2} ${yPos} 
+                                L ${250 + topWidth/2} ${yPos} 
+                                L ${250 + bottomWidth/2} ${yPos + height} 
+                                L ${250 - bottomWidth/2} ${yPos + height} Z`}
                             fill={colors[index]}
+                            stroke="#000000"
+                            strokeWidth="3"
                             className="cursor-pointer transition-opacity duration-300 hover:opacity-80"
                             onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
                             onMouseEnter={() => setHoveredFunnelStage(item.stage)}
                             onMouseLeave={() => setHoveredFunnelStage(null)}
                           />
                           
-                          {/* Icon */}
-                          <foreignObject x={200 - 15} y={yPos + 15} width="30" height="30">
-                            <div className="flex items-center justify-center w-full h-full text-white">
+                          {/* Icon and Count inside each section */}
+                          <foreignObject x={250 - 20} y={yPos + height/2 - 20} width="40" height="40">
+                            <div className="flex flex-col items-center justify-center w-full h-full">
                               {(() => {
                                 const IconComponent = pipelineStages.find(s => s.name === item.stage)?.icon || Users;
-                                return <IconComponent size={20} className="text-white" />;
+                                return <IconComponent size={16} className="text-slate-800 mb-1" />;
                               })()}
+                              <span className="text-xs font-bold text-slate-800">{item.count}</span>
                             </div>
                           </foreignObject>
-                          
-                          {/* Count */}
-                          <text 
-                            x="200" 
-                            y={yPos + 50} 
-                            textAnchor="middle" 
-                            className="fill-white font-bold text-lg"
-                          >
-                            {item.count}
-                          </text>
                         </g>
                       );
                     })}
                     
-                    {/* Funnel outlet/stem */}
-                    <path
-                      d={`M ${200 - 15} ${funnelData.length * 55} 
-                          L ${200 + 15} ${funnelData.length * 55} 
-                          L ${200 + 10} ${funnelData.length * 55 + 40} 
-                          L ${200 - 10} ${funnelData.length * 55 + 40} Z`}
-                      fill="#EC4899"
+                    {/* Funnel outlet - rectangular bottom piece */}
+                    <rect
+                      x={250 - 25}
+                      y={350}
+                      width={50}
+                      height={30}
+                      fill="#FB7185"
+                      stroke="#000000"
+                      strokeWidth="3"
                     />
                   </svg>
                   
-                  {/* Stage Labels on the sides */}
-                  <div className="absolute inset-0">
+                  {/* Stage Labels positioned around the funnel */}
+                  <div className="absolute inset-0 pointer-events-none">
                     {funnelData.map((item, index) => {
-                      const yPos = index * 55 + 30;
-                      const isLeft = index % 2 === 0;
+                      // Position labels dynamically based on section
+                      const positions = [
+                        { x: -180, y: 60, align: 'left' },
+                        { x: 520, y: 135, align: 'right' },
+                        { x: -180, y: 200, align: 'left' },
+                        { x: 520, y: 255, align: 'right' },
+                        { x: -180, y: 300, align: 'left' },
+                        { x: 520, y: 340, align: 'right' }
+                      ];
+                      
+                      const pos = positions[index] || positions[0];
                       
                       return (
-                        <div key={index} className="absolute flex items-center">
-                          {/* Number and connecting line */}
-                          <div 
-                            className={`absolute flex items-center ${
-                              isLeft ? 'left-0' : 'right-0'
-                            }`}
-                            style={{ top: `${yPos}px` }}
-                          >
-                            {isLeft ? (
-                              <>
-                                {/* Number circle */}
-                                <div className="w-8 h-8 bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                                  {index + 1}
-                                </div>
-                                {/* Label */}
-                                <div className="text-slate-900 dark:text-white">
-                                  <p className="font-medium text-sm">{item.stage}</p>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {item.count} leads ({item.percentage.toFixed(1)}%)
-                                  </p>
-                                </div>
-                                {/* Connecting line */}
-                                <div 
-                                  className="absolute left-8 w-16 h-px bg-slate-400 dark:bg-slate-500"
-                                  style={{ top: '16px' }}
-                                />
-                                {/* Dot */}
-                                <div 
-                                  className="absolute w-3 h-3 rounded-full"
-                                  style={{ 
-                                    left: '96px', 
-                                    top: '10px',
-                                    backgroundColor: ['#14B8A6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899'][index]
-                                  }}
-                                />
-                              </>
-                            ) : (
-                              <>
-                                {/* Dot */}
-                                <div 
-                                  className="absolute w-3 h-3 rounded-full"
-                                  style={{ 
-                                    right: '96px', 
-                                    top: '10px',
-                                    backgroundColor: ['#14B8A6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899'][index]
-                                  }}
-                                />
-                                {/* Connecting line */}
-                                <div 
-                                  className="absolute right-8 w-16 h-px bg-slate-400 dark:bg-slate-500"
-                                  style={{ top: '16px' }}
-                                />
-                                {/* Label */}
-                                <div className="text-slate-900 dark:text-white text-right mr-3">
-                                  <p className="font-medium text-sm">{item.stage}</p>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    {item.count} leads ({item.percentage.toFixed(1)}%)
-                                  </p>
-                                </div>
-                                {/* Number circle */}
-                                <div className="w-8 h-8 bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 rounded-full flex items-center justify-center text-sm font-bold">
-                                  {index + 1}
-                                </div>
-                              </>
-                            )}
+                        <div 
+                          key={index} 
+                          className="absolute flex items-center"
+                          style={{ 
+                            left: `${pos.x}px`, 
+                            top: `${pos.y}px`,
+                            textAlign: pos.align
+                          }}
+                        >
+                          <div className={`flex items-center ${pos.align === 'right' ? 'flex-row-reverse' : ''}`}>
+                            {/* Stage number */}
+                            <div className="w-8 h-8 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-800 rounded-full flex items-center justify-center text-sm font-bold mx-3">
+                              {index + 1}
+                            </div>
+                            {/* Stage info */}
+                            <div className={`${pos.align === 'right' ? 'text-right' : 'text-left'}`}>
+                              <p className="font-medium text-sm text-slate-900 dark:text-white">{item.stage}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {item.count} leads ({item.percentage.toFixed(1)}%)
+                              </p>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
-                  </div>
-                  
-                  {/* Coins at bottom */}
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2" style={{ top: `${funnelData.length * 55 + 60}px` }}>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-yellow-900 font-bold text-sm shadow-lg"
-                        style={{ 
-                          animationDelay: `${i * 200}ms`,
-                          animation: 'bounce 2s infinite'
-                        }}
-                      >
-                        $
-                      </div>
-                    ))}
                   </div>
                 </div>
                 
