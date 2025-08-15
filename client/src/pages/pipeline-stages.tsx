@@ -34,7 +34,45 @@ const pipelineStages = [
   { id: 8, name: "Deal Won", icon: Trophy, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400", count: 18 }
 ];
 
-// Mock lead data
+// Mock lead data with expanded dataset for each stage
+const mockLeadsByStage = {
+  "Lead Enriched": [
+    { id: "1", name: "Sarah Chen", company: "TechCorp", avatar: "SC", email: "sarah@techcorp.com", score: "Hot", addedDate: "2025-01-14" },
+    { id: "2", name: "Mike Johnson", company: "DataFlow", avatar: "MJ", email: "mike@dataflow.com", score: "Warm", addedDate: "2025-01-14" },
+    { id: "3", name: "Alex Kumar", company: "CloudTech", avatar: "AK", email: "alex@cloudtech.com", score: "Cold", addedDate: "2025-01-13" },
+    { id: "4", name: "Emma Wilson", company: "DevCorp", avatar: "EW", email: "emma@devcorp.com", score: "Hot", addedDate: "2025-01-13" },
+    { id: "5", name: "John Smith", company: "StartupXYZ", avatar: "JS", email: "john@startupxyz.com", score: "Warm", addedDate: "2025-01-12" },
+  ],
+  "Initial AI Call Done": [
+    { id: "6", name: "Lisa Park", company: "InnovateLabs", avatar: "LP", email: "lisa@innovate.com", score: "Hot", addedDate: "2025-01-13" },
+    { id: "7", name: "David Chen", company: "TechSolutions", avatar: "DC", email: "david@techsol.com", score: "Warm", addedDate: "2025-01-12" },
+    { id: "8", name: "Maria Garcia", company: "FinanceHub", avatar: "MG", email: "maria@financehub.com", score: "Hot", addedDate: "2025-01-12" },
+  ],
+  "Meeting Booked": [
+    { id: "9", name: "Robert Brown", company: "ScaleUp Inc", avatar: "RB", email: "robert@scaleup.com", score: "Hot", addedDate: "2025-01-11" },
+    { id: "10", name: "Jennifer Lee", company: "GrowthCo", avatar: "JL", email: "jen@growthco.com", score: "Warm", addedDate: "2025-01-11" },
+  ],
+  "In Nurture Campaign": [
+    { id: "11", name: "Steven Davis", company: "Enterprise Ltd", avatar: "SD", email: "steven@enterprise.com", score: "Warm", addedDate: "2025-01-10" },
+    { id: "12", name: "Rachel Kim", company: "SaaS Solutions", avatar: "RK", email: "rachel@saas.com", score: "Cold", addedDate: "2025-01-10" },
+  ],
+  "Meeting No Show-up": [
+    { id: "13", name: "Tom Anderson", company: "MissedCorp", avatar: "TA", email: "tom@missed.com", score: "Cold", addedDate: "2025-01-09" },
+  ],
+  "Meeting Finished": [
+    { id: "14", name: "Amy Johnson", company: "CompleteCorp", avatar: "AJ", email: "amy@complete.com", score: "Hot", addedDate: "2025-01-08" },
+    { id: "15", name: "Chris Wilson", company: "DoneCorp", avatar: "CW", email: "chris@done.com", score: "Warm", addedDate: "2025-01-07" },
+  ],
+  "No More Interested": [
+    { id: "16", name: "Sam Taylor", company: "NotInterestedInc", avatar: "ST", email: "sam@notint.com", score: "Cold", addedDate: "2025-01-06" },
+  ],
+  "Deal Won": [
+    { id: "17", name: "Emily Rodriguez", company: "CloudSync", avatar: "ER", email: "emily@cloudsync.com", score: "Hot", addedDate: "2025-01-05" },
+    { id: "18", name: "James Wilson", company: "StartupX", avatar: "JW", email: "james@startupx.com", score: "Hot", addedDate: "2025-01-04" },
+  ]
+};
+
+// Mock lead data for animation
 const mockLeads = [
   { id: "1", name: "Sarah Chen", company: "TechCorp", stage: "Lead Enriched", avatar: "SC", progress: 12.5 },
   { id: "2", name: "Mike Johnson", company: "DataFlow", stage: "Initial AI Call Done", avatar: "MJ", progress: 25 },
@@ -57,7 +95,9 @@ const funnelData = [
 export default function PipelineStages() {
   const { theme, toggleTheme } = useTheme();
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
+  const [selectedStageName, setSelectedStageName] = useState<string | null>(null);
   const [animatingLeads, setAnimatingLeads] = useState<string[]>([]);
+  const [hoveredFunnelStage, setHoveredFunnelStage] = useState<string | null>(null);
 
   // Simulate lead movement animation
   useEffect(() => {
@@ -76,6 +116,20 @@ export default function PipelineStages() {
   const getStageIcon = (stage: typeof pipelineStages[0]) => {
     const Icon = stage.icon;
     return <Icon className="h-5 w-5" />;
+  };
+
+  const getScoreColor = (score: string) => {
+    switch (score) {
+      case "Hot": return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
+      case "Warm": return "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400";
+      case "Cold": return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400";
+      default: return "bg-slate-100 text-slate-700 dark:bg-slate-900/20 dark:text-slate-400";
+    }
+  };
+
+  const handleStageClick = (stageId: number, stageName: string) => {
+    setSelectedStage(stageId);
+    setSelectedStageName(stageName);
   };
 
   return (
@@ -161,28 +215,47 @@ export default function PipelineStages() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-2 py-4">
                 {funnelData.map((item, index) => (
-                  <div 
-                    key={item.stage}
+                  <div
+                    key={index}
                     className="relative cursor-pointer group"
-                    onClick={() => setSelectedStage(pipelineStages.find(s => s.name === item.stage)?.id || null)}
-                    data-testid={`funnel-stage-${index}`}
+                    onMouseEnter={() => setHoveredFunnelStage(item.stage)}
+                    onMouseLeave={() => setHoveredFunnelStage(null)}
+                    onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        {item.stage}
-                      </span>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">
-                        {item.count} leads ({item.percentage.toFixed(1)}%)
-                      </span>
+                    {/* Funnel Shape */}
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 group-hover:opacity-80 relative flex items-center justify-center text-white font-medium text-sm"
+                      style={{
+                        width: `${Math.max(item.percentage * 3, 120)}px`,
+                        height: '60px',
+                        clipPath: index === funnelData.length - 1 
+                          ? 'polygon(10% 0%, 90% 0%, 90% 100%, 10% 100%)'  // Rectangle for last item
+                          : 'polygon(15% 0%, 85% 0%, 90% 100%, 10% 100%)', // Trapezoid for others
+                        backgroundColor: `hsl(${220 + index * 20}, 70%, ${60 - index * 5}%)`
+                      }}
+                    >
+                      <div className="text-center px-2">
+                        <div className="font-bold text-lg">{item.count}</div>
+                        <div className="text-xs opacity-90 truncate">{item.stage}</div>
+                      </div>
                     </div>
-                    <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 group-hover:opacity-80"
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
+                    
+                    {/* Hover Tooltip */}
+                    {hoveredFunnelStage === item.stage && (
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-10">
+                        <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 rounded-lg text-xs font-medium shadow-lg">
+                          {item.count} leads ({item.percentage.toFixed(1)}%)
+                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-100 rotate-45"></div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Connection Arrow */}
+                    {index < funnelData.length - 1 && (
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-slate-300 dark:border-t-slate-600"></div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -201,36 +274,65 @@ export default function PipelineStages() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {selectedStage ? (
+              {selectedStage && selectedStageName ? (
                 <div className="space-y-4">
-                  <div className="text-center p-6">
-                    <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${
+                  <div className="text-center p-4 border-b border-slate-200 dark:border-slate-700">
+                    <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${
                       pipelineStages.find(s => s.id === selectedStage)?.color
                     }`}>
                       {getStageIcon(pipelineStages.find(s => s.id === selectedStage)!)}
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {pipelineStages.find(s => s.id === selectedStage)?.count}
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {selectedStageName}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400">leads in this stage</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {mockLeadsByStage[selectedStageName as keyof typeof mockLeadsByStage]?.length || 0} leads
+                    </p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Avg. Time</p>
-                      <p className="font-semibold text-slate-900 dark:text-white">2.3 days</p>
-                    </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Success Rate</p>
-                      <p className="font-semibold text-slate-900 dark:text-white">67%</p>
-                    </div>
+                  {/* Scrollable Lead List */}
+                  <div className="h-64 overflow-y-auto space-y-2">
+                    {mockLeadsByStage[selectedStageName as keyof typeof mockLeadsByStage]?.map((lead) => (
+                      <div key={lead.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {lead.avatar}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-slate-900 dark:text-white text-sm">
+                              {lead.name}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {lead.company}
+                            </p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              {lead.email}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className={getScoreColor(lead.score)} variant="secondary">
+                            {lead.score}
+                          </Badge>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            {lead.addedDate}
+                          </p>
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-center py-8">
+                        <p className="text-slate-500 dark:text-slate-400">No leads found in this stage</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <BarChart3 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
                   <p className="text-slate-600 dark:text-slate-400">
-                    Click on a stage to view detailed metrics
+                    Click on a stage in the funnel to view leads
                   </p>
                 </div>
               )}
@@ -238,72 +340,136 @@ export default function PipelineStages() {
           </Card>
         </div>
 
-        {/* Animated Lead Journey */}
+        {/* Enhanced Lead Movement Tracking */}
         <Card className="bg-white dark:bg-slate-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Live Lead Movement
+              Live Lead Movement Tracker
             </CardTitle>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Real-time visualization of leads moving through your sales pipeline
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="relative overflow-hidden">
-              {/* Journey Path */}
-              <div className="relative h-32 mb-6">
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 120">
-                  <path
-                    d="M 50 60 Q 200 20 350 60 T 650 60 T 750 60"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    fill="none"
-                    className="text-slate-300 dark:text-slate-600"
-                  />
-                </svg>
-                
-                {/* Animated Lead Cards */}
-                {mockLeads.slice(0, 4).map((lead, index) => (
-                  <div
-                    key={lead.id}
-                    className={`absolute transition-all duration-2000 ease-in-out ${
-                      animatingLeads.includes(lead.id) ? 'animate-pulse' : ''
-                    }`}
-                    style={{
-                      left: `${(lead.progress / 100) * 85 + 5}%`,
-                      top: `${40 + Math.sin(index) * 10}px`,
-                      transform: animatingLeads.includes(lead.id) ? 'translateX(50px)' : 'translateX(0)'
-                    }}
-                    data-testid={`journey-lead-${lead.id}`}
-                  >
-                    <div className="bg-white dark:bg-slate-700 rounded-lg shadow-lg p-3 border border-slate-200 dark:border-slate-600 min-w-32">
-                      <div className="flex items-center space-x-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+            <div className="space-y-6">
+              {/* Movement Legend */}
+              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Currently Moving</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Completed Stage</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-slate-400 rounded-full"></div>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Waiting</span>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  Updates every 30 seconds
+                </Badge>
+              </div>
+
+              {/* Pipeline Flow Visualization */}
+              <div className="relative">
+                {/* Progress Path */}
+                <div className="flex items-center justify-between mb-8">
+                  {pipelineStages.slice(0, 6).map((stage, index) => (
+                    <div key={stage.id} className="flex flex-col items-center">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+                        index <= 3 ? 'bg-green-500' : index === 4 ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="text-xs text-center mt-2 max-w-20 leading-tight">
+                        <p className="font-medium text-slate-900 dark:text-white">{stage.name}</p>
+                        <p className="text-slate-500 dark:text-slate-400">{stage.count} leads</p>
+                      </div>
+                      {index < 5 && (
+                        <div className="absolute top-6 w-full h-0.5 bg-slate-200 dark:bg-slate-600" 
+                             style={{ 
+                               left: `${(100 / 5) * index + (100 / 5 / 2)}%`, 
+                               width: `${100 / 5}%`,
+                               backgroundColor: index < 3 ? '#22c55e' : '#e2e8f0'
+                             }} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Active Lead Movement Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {mockLeads.slice(0, 4).map((lead, index) => (
+                    <div
+                      key={lead.id}
+                      className={`p-3 bg-white dark:bg-slate-700 rounded-lg border-2 transition-all duration-500 ${
+                        animatingLeads.includes(lead.id) 
+                          ? 'border-blue-500 shadow-lg scale-105' 
+                          : 'border-slate-200 dark:border-slate-600'
+                      }`}
+                      data-testid={`movement-lead-${lead.id}`}
+                    >
+                      <div className="flex items-center space-x-3 mb-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
                             {lead.avatar}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium text-slate-900 dark:text-white truncate">
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white text-sm">
                             {lead.name}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             {lead.company}
                           </p>
                         </div>
                       </div>
-                      <Progress value={lead.progress} className="mt-2 h-1" />
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-slate-600 dark:text-slate-400">Current Stage:</span>
+                          <Badge variant="outline" className="text-xs">
+                            {lead.stage}
+                          </Badge>
+                        </div>
+                        <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-1000 ${
+                              animatingLeads.includes(lead.id) 
+                                ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
+                                : 'bg-gradient-to-r from-green-500 to-blue-500'
+                            }`}
+                            style={{ width: `${lead.progress}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                          {lead.progress}% Complete
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                Watch your leads progress through the automation pipeline
-              </p>
-              <Badge variant="outline" className="text-xs">
-                Real-time updates every 30 seconds
-              </Badge>
+
+              {/* Movement Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">24</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Leads moved today</p>
+                </div>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">2.3</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Avg days per stage</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">85%</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Pipeline velocity</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
