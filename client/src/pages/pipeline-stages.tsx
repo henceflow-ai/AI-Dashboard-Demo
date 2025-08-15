@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -215,49 +215,181 @@ export default function PipelineStages() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center space-y-2 py-4">
-                {funnelData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="relative cursor-pointer group"
-                    onMouseEnter={() => setHoveredFunnelStage(item.stage)}
-                    onMouseLeave={() => setHoveredFunnelStage(null)}
-                    onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
-                  >
-                    {/* Funnel Shape */}
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 group-hover:opacity-80 relative flex items-center justify-center text-white font-medium text-sm"
-                      style={{
-                        width: `${Math.max(item.percentage * 3, 120)}px`,
-                        height: '60px',
-                        clipPath: index === funnelData.length - 1 
-                          ? 'polygon(10% 0%, 90% 0%, 90% 100%, 10% 100%)'  // Rectangle for last item
-                          : 'polygon(15% 0%, 85% 0%, 90% 100%, 10% 100%)', // Trapezoid for others
-                        backgroundColor: `hsl(${220 + index * 20}, 70%, ${60 - index * 5}%)`
-                      }}
-                    >
-                      <div className="text-center px-2">
-                        <div className="font-bold text-lg">{item.count}</div>
-                        <div className="text-xs opacity-90 truncate">{item.stage}</div>
-                      </div>
-                    </div>
+              <div className="relative flex items-center justify-center py-8 px-4">
+                {/* Main Funnel Shape */}
+                <div className="relative">
+                  <svg width="400" height="500" viewBox="0 0 400 500" className="overflow-visible">
+                    {/* Funnel sections from top to bottom */}
+                    {funnelData.map((item, index) => {
+                      const colors = [
+                        '#14B8A6', // Teal
+                        '#06B6D4', // Cyan  
+                        '#10B981', // Emerald
+                        '#F59E0B', // Amber
+                        '#EF4444', // Red
+                        '#EC4899'  // Pink
+                      ];
+                      
+                      const topWidth = 320 - (index * 45);
+                      const bottomWidth = 320 - ((index + 1) * 45);
+                      const height = 60;
+                      const yPos = index * 55;
+                      
+                      return (
+                        <g key={index}>
+                          {/* Funnel Section */}
+                          <path
+                            d={`M ${200 - topWidth/2} ${yPos} 
+                                L ${200 + topWidth/2} ${yPos} 
+                                L ${200 + bottomWidth/2} ${yPos + height} 
+                                L ${200 - bottomWidth/2} ${yPos + height} Z`}
+                            fill={colors[index]}
+                            className="cursor-pointer transition-opacity duration-300 hover:opacity-80"
+                            onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
+                            onMouseEnter={() => setHoveredFunnelStage(item.stage)}
+                            onMouseLeave={() => setHoveredFunnelStage(null)}
+                          />
+                          
+                          {/* Icon */}
+                          <foreignObject x={200 - 15} y={yPos + 15} width="30" height="30">
+                            <div className="flex items-center justify-center w-full h-full text-white">
+                              {(() => {
+                                const IconComponent = pipelineStages.find(s => s.name === item.stage)?.icon || Users;
+                                return <IconComponent size={20} className="text-white" />;
+                              })()}
+                            </div>
+                          </foreignObject>
+                          
+                          {/* Count */}
+                          <text 
+                            x="200" 
+                            y={yPos + 50} 
+                            textAnchor="middle" 
+                            className="fill-white font-bold text-lg"
+                          >
+                            {item.count}
+                          </text>
+                        </g>
+                      );
+                    })}
                     
-                    {/* Hover Tooltip */}
-                    {hoveredFunnelStage === item.stage && (
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-10">
-                        <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 rounded-lg text-xs font-medium shadow-lg">
-                          {item.count} leads ({item.percentage.toFixed(1)}%)
-                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-100 rotate-45"></div>
+                    {/* Funnel outlet/stem */}
+                    <path
+                      d={`M ${200 - 15} ${funnelData.length * 55} 
+                          L ${200 + 15} ${funnelData.length * 55} 
+                          L ${200 + 10} ${funnelData.length * 55 + 40} 
+                          L ${200 - 10} ${funnelData.length * 55 + 40} Z`}
+                      fill="#EC4899"
+                    />
+                  </svg>
+                  
+                  {/* Stage Labels on the sides */}
+                  <div className="absolute inset-0">
+                    {funnelData.map((item, index) => {
+                      const yPos = index * 55 + 30;
+                      const isLeft = index % 2 === 0;
+                      
+                      return (
+                        <div key={index} className="absolute flex items-center">
+                          {/* Number and connecting line */}
+                          <div 
+                            className={`absolute flex items-center ${
+                              isLeft ? 'left-0' : 'right-0'
+                            }`}
+                            style={{ top: `${yPos}px` }}
+                          >
+                            {isLeft ? (
+                              <>
+                                {/* Number circle */}
+                                <div className="w-8 h-8 bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                                  {index + 1}
+                                </div>
+                                {/* Label */}
+                                <div className="text-slate-900 dark:text-white">
+                                  <p className="font-medium text-sm">{item.stage}</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    {item.count} leads ({item.percentage.toFixed(1)}%)
+                                  </p>
+                                </div>
+                                {/* Connecting line */}
+                                <div 
+                                  className="absolute left-8 w-16 h-px bg-slate-400 dark:bg-slate-500"
+                                  style={{ top: '16px' }}
+                                />
+                                {/* Dot */}
+                                <div 
+                                  className="absolute w-3 h-3 rounded-full"
+                                  style={{ 
+                                    left: '96px', 
+                                    top: '10px',
+                                    backgroundColor: ['#14B8A6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899'][index]
+                                  }}
+                                />
+                              </>
+                            ) : (
+                              <>
+                                {/* Dot */}
+                                <div 
+                                  className="absolute w-3 h-3 rounded-full"
+                                  style={{ 
+                                    right: '96px', 
+                                    top: '10px',
+                                    backgroundColor: ['#14B8A6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899'][index]
+                                  }}
+                                />
+                                {/* Connecting line */}
+                                <div 
+                                  className="absolute right-8 w-16 h-px bg-slate-400 dark:bg-slate-500"
+                                  style={{ top: '16px' }}
+                                />
+                                {/* Label */}
+                                <div className="text-slate-900 dark:text-white text-right mr-3">
+                                  <p className="font-medium text-sm">{item.stage}</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    {item.count} leads ({item.percentage.toFixed(1)}%)
+                                  </p>
+                                </div>
+                                {/* Number circle */}
+                                <div className="w-8 h-8 bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 rounded-full flex items-center justify-center text-sm font-bold">
+                                  {index + 1}
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
-                    {/* Connection Arrow */}
-                    {index < funnelData.length - 1 && (
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-slate-300 dark:border-t-slate-600"></div>
-                    )}
+                      );
+                    })}
                   </div>
-                ))}
+                  
+                  {/* Coins at bottom */}
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2" style={{ top: `${funnelData.length * 55 + 60}px` }}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-yellow-900 font-bold text-sm shadow-lg"
+                        style={{ 
+                          animationDelay: `${i * 200}ms`,
+                          animation: 'bounce 2s infinite'
+                        }}
+                      >
+                        $
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Hover Tooltip */}
+                {hoveredFunnelStage && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-lg text-sm font-medium shadow-xl">
+                      <p className="font-semibold">{hoveredFunnelStage}</p>
+                      <p className="text-xs opacity-90">
+                        {funnelData.find(f => f.stage === hoveredFunnelStage)?.count} leads 
+                        ({funnelData.find(f => f.stage === hoveredFunnelStage)?.percentage.toFixed(1)}%)
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
