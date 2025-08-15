@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sales Automation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#64748b',
+                        accent: '#059669',
+                        warning: '#d97706',
+                        danger: '#dc2626'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-inter">
+    <!-- @COMPONENT: DashboardLayout [Main layout container with sidebar and content] -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- @COMPONENT: Sidebar [Navigation sidebar with menu items] -->
+        <!-- Sidebar -->
+        <div class="hidden lg:flex lg:flex-shrink-0">
+            <div class="flex flex-col w-64">
+                <div class="flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700">
+                    <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                        <!-- Logo -->
+                        <div class="flex items-center flex-shrink-0 px-4 mb-8">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-robot text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-xl font-bold text-slate-900 dark:text-white">AI Dashboard</h1>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Sales Automation</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Navigation -->
+                        <nav class="flex-1 px-2 space-y-1">
+                            <a href="#" class="bg-primary/10 text-primary border-r-2 border-primary group flex items-center px-2 py-2 text-sm font-medium rounded-l-md">
+                                <i class="fas fa-chart-line mr-3 text-sm"></i>
+                                Analytics Overview
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-users mr-3 text-sm"></i>
+                                Lead Insights
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-filter mr-3 text-sm"></i>
+                                Pipeline Stages
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-calendar-alt mr-3 text-sm"></i>
+                                Meetings View
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-envelope mr-3 text-sm"></i>
+                                Nurture Campaigns
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-brain mr-3 text-sm"></i>
+                                AI Assistant
+                            </a>
+                            <a href="#" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                <i class="fas fa-cogs mr-3 text-sm"></i>
+                                Automation Control Center
+                            </a>
+                        </nav>
+                    </div>
+                    <!-- User Profile -->
+                    <div class="flex-shrink-0 flex border-t border-slate-200 dark:border-slate-700 p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center">
+                                    <i class="fas fa-user text-slate-600 dark:text-slate-300 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-slate-700 dark:text-slate-200" data-mock="true">Business Owner</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400" data-mock="true">Premium Plan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainContent [Main dashboard content area] -->
+        <!-- Main content -->
+        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+            <!-- Top header -->
+            <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center">
+                        <button class="lg:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="ml-4 lg:ml-0">
+                            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Analytics Overview</h1>
+                            <p class="text-sm text-slate-600 dark:text-slate-400">Monitor your AI automation performance</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- Theme Toggle -->
+                        <button class="p-2 rounded-md text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700" onclick="toggleTheme()">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:inline"></i>
+                        </button>
+                        <!-- Status Indicator -->
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                            <span class="text-sm text-accent font-medium">AI System Active</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto">
+                <div class="px-4 py-6 sm:px-6 lg:px-8">
+                    
+                    <!-- @COMPONENT: MetricsGrid [Grid of key performance metrics] -->
+                    <!-- Key Metrics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Total Leads -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 font-medium">Total Leads in Pipeline</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-bind="totalLeads">2,847</p>
+                                    <p class="text-sm text-accent font-medium mt-1">
+                                        <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                        +12.3% from last month
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-primary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contacted Leads -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 font-medium">Contacted Leads</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-bind="contactedLeads">1,924</p>
+                                    <p class="text-sm text-warning font-medium mt-1">
+                                        <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                        +8.7% from last month
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-phone text-warning text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meetings Booked -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 font-medium">Meetings Booked</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-bind="meetingsBooked">342</p>
+                                    <p class="text-sm text-accent font-medium mt-1">
+                                        <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                        +15.2% from last month
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-accent text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Potential Deals -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 font-medium">Potential Deals</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-bind="potentialDeals">$1.2M</p>
+                                    <p class="text-sm text-danger font-medium mt-1">
+                                        <i class="fas fa-arrow-down text-xs mr-1"></i>
+                                        -2.1% from last month
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 bg-danger/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-danger text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: MetricsGrid -->
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <!-- @COMPONENT: LeadPipelineChart [Chart showing lead progression through pipeline] -->
+                        <!-- Pipeline Chart -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Lead Pipeline Performance</h3>
+                                    <div class="flex items-center space-x-2">
+                                        <select class="text-sm border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1 bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
+                                            <option>Last 30 days</option>
+                                            <option>Last 90 days</option>
+                                            <option>Last year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="h-80">
+                                    <canvas id="pipelineChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: LeadPipelineChart -->
+
+                        <!-- @COMPONENT: SystemStats [Key system statistics and performance metrics] -->
+                        <!-- Key System Stats -->
+                        <div class="space-y-6">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                                <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Key System Stats</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-phone-alt text-primary text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900 dark:text-white">Calls Completed Today</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">AI outreach calls</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white" data-bind="callsToday">147</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar-plus text-accent text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900 dark:text-white">Meetings Scheduled</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">Today's bookings</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white" data-bind="meetingsScheduled">23</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-percentage text-warning text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900 dark:text-white">Show Rate</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">Attended / Booked</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white" data-bind="showRate">78.5%</p>
+                                    </div>
+                                    
+                                    <!-- Progress Bar for Show Rate -->
+                                    <div class="pt-2">
+                                        <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                                            <span>This Month's Performance</span>
+                                            <span>78.5%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                            <div class="bg-warning h-2 rounded-full" style="width: 78.5%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: SystemStats -->
+                    </div>
+
+                    <!-- @COMPONENT: RecentActivities [Feed of recent system activities and events] -->
+                    <!-- Recent Activities -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Recent Activities</h3>
+                            <button class="text-sm text-primary hover:text-primary/80 font-medium">View All</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- @MAP: recentActivities.map(activity => ( -->
+                            <div class="flex items-start space-x-4" data-mock="true">
+                                <div class="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-user-plus text-accent text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 dark:text-white">
+                                        New lead <span class="font-semibold">Sarah Johnson</span> added to pipeline
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">2 minutes ago</p>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+                                    Lead Generation
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4" data-mock="true">
+                                <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-phone text-primary text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 dark:text-white">
+                                        AI completed call with <span class="font-semibold">Mike Chen</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">5 minutes ago</p>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+                                    Outreach
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4" data-mock="true">
+                                <div class="w-8 h-8 bg-warning/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-calendar-check text-warning text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 dark:text-white">
+                                        Meeting scheduled with <span class="font-semibold">Alex Rodriguez</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">12 minutes ago</p>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+                                    Meeting
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4" data-mock="true">
+                                <div class="w-8 h-8 bg-danger/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-exclamation-triangle text-danger text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 dark:text-white">
+                                        Call attempt failed for <span class="font-semibold">Jennifer Davis</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">18 minutes ago</p>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+                                    Error
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4" data-mock="true">
+                                <div class="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-handshake text-accent text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-900 dark:text-white">
+                                        Deal closed with <span class="font-semibold">TechCorp Solutions</span> - $45,000
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">23 minutes ago</p>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+                                    Conversion
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: RecentActivities -->
+
+                </div>
+            </main>
+        </div>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+    <!-- @END_COMPONENT: DashboardLayout -->
+
+    <script>
+        // Chart initialization
+        (function() {
+            const ctx = document.getElementById('pipelineChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Total Leads',
+                        data: [1200, 1350, 1100, 1800, 2200, 2100, 2400, 2300, 2600, 2500, 2700, 2847],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Contacted',
+                        data: [800, 900, 750, 1200, 1500, 1400, 1650, 1550, 1750, 1680, 1800, 1924],
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Meetings Booked',
+                        data: [120, 135, 105, 180, 220, 200, 240, 230, 280, 260, 320, 342],
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // TODO: Implement real-time data updates from Airtable backend
+            // TODO: Add interactivity for drilling down into specific metrics
+            // TODO: Implement data refresh mechanism
+        })();
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            // TODO: Save theme preference to localStorage
+            // TODO: Sync theme preference with user profile
+        }
+
+        // TODO: Implement responsive sidebar toggle for mobile
+        // TODO: Add real-time notifications system
+        // TODO: Implement data filtering and date range selection
+        // TODO: Add export functionality for reports
+        // TODO: Implement user authentication and session management
+        // TODO: Add loading states for data fetching
+        // TODO: Implement error handling and retry mechanisms
+        // TODO: Add tooltips and help text for metrics
+        // TODO: Implement drill-down functionality for detailed views
+    </script>
+</body>
+</html>
