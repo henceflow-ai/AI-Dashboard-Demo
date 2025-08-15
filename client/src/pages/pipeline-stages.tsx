@@ -216,11 +216,19 @@ export default function PipelineStages() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center py-8 px-4">
-                <div className="relative">
+                <div className="relative" style={{ width: '400px', height: '500px' }}>
                   {funnelData.map((item, index) => {
-                    // Calculate width based on percentage, with smooth tapering
-                    const baseWidth = 300;
-                    const width = Math.max(baseWidth * (item.percentage / 100), 80);
+                    // Create proper funnel proportions - each layer progressively smaller
+                    const totalLayers = funnelData.length;
+                    const layerRatio = (totalLayers - index) / totalLayers;
+                    const maxWidth = 350;
+                    const minWidth = 100;
+                    const width = minWidth + (maxWidth - minWidth) * layerRatio;
+                    
+                    // Calculate height and vertical position
+                    const layerHeight = 60;
+                    const layerSpacing = 10;
+                    const topPosition = index * (layerHeight + layerSpacing);
                     
                     // Define gradient colors that match the attached image
                     const gradients = [
@@ -232,29 +240,35 @@ export default function PipelineStages() {
                       'from-blue-500 via-cyan-500 to-green-500'       // Blue to green
                     ];
                     
+                    // Create trapezoid clip-path for proper funnel shape
+                    const topWidth = 100;
+                    const bottomWidth = Math.max(100 - (index * 8), 20);
+                    const clipPath = `polygon(${topWidth/2}% 0%, ${100-topWidth/2}% 0%, ${100-bottomWidth/2}% 100%, ${bottomWidth/2}% 100%)`;
+                    
                     return (
                       <div
                         key={index}
-                        className="relative cursor-pointer group"
+                        className="absolute cursor-pointer group"
                         onMouseEnter={() => setHoveredFunnelStage(item.stage)}
                         onMouseLeave={() => setHoveredFunnelStage(null)}
                         onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
                         style={{
-                          marginBottom: index < funnelData.length - 1 ? '8px' : '0'
+                          top: `${topPosition}px`,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: `${width}px`,
+                          height: `${layerHeight}px`,
+                          zIndex: totalLayers - index, // Stack layers properly
                         }}
                       >
                         {/* Funnel Layer */}
                         <div
-                          className={`bg-gradient-to-r ${gradients[index]} transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg relative flex items-center justify-center text-white font-medium shadow-lg`}
+                          className={`bg-gradient-to-r ${gradients[index]} transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl relative flex items-center justify-center text-white font-medium shadow-lg`}
                           style={{
-                            width: `${width}px`,
-                            height: '50px',
-                            clipPath: index === 0 
-                              ? 'polygon(8% 0%, 92% 0%, 88% 100%, 12% 100%)' // Widest at top
-                              : index === funnelData.length - 1
-                              ? 'polygon(25% 0%, 75% 0%, 70% 100%, 30% 100%)' // Narrowest at bottom
-                              : 'polygon(15% 0%, 85% 0%, 80% 100%, 20% 100%)', // Progressive narrowing
-                            filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))',
+                            width: '100%',
+                            height: '100%',
+                            clipPath: clipPath,
+                            filter: 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15))',
                           }}
                         >
                           <div className="text-center px-3">
@@ -267,7 +281,7 @@ export default function PipelineStages() {
                         
                         {/* Enhanced Hover Tooltip */}
                         {hoveredFunnelStage === item.stage && (
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 z-20">
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 z-30">
                             <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-lg text-sm font-medium shadow-xl border border-slate-200 dark:border-slate-700">
                               <div className="font-semibold">{item.stage}</div>
                               <div className="text-xs opacity-90 mt-1">
@@ -281,22 +295,27 @@ export default function PipelineStages() {
                     );
                   })}
                   
-                  {/* Subtle connecting elements */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {funnelData.slice(0, -1).map((_, index) => (
-                      <div
-                        key={index}
-                        className="absolute bg-gradient-to-b from-transparent via-slate-200/30 to-transparent"
-                        style={{
-                          top: `${(index + 1) * 58 - 4}px`,
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: '2px',
-                          height: '8px',
-                        }}
-                      />
-                    ))}
-                  </div>
+                  {/* Funnel outline/guide lines for better visual structure */}
+                  <svg
+                    className="absolute inset-0 pointer-events-none opacity-20"
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 400 500"
+                  >
+                    <defs>
+                      <linearGradient id="outlineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#64748b" stopOpacity="0.3"/>
+                        <stop offset="100%" stopColor="#64748b" stopOpacity="0.1"/>
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M 50 0 L 350 0 L 250 420 L 150 420 Z"
+                      fill="none"
+                      stroke="url(#outlineGradient)"
+                      strokeWidth="2"
+                      strokeDasharray="5,5"
+                    />
+                  </svg>
                 </div>
               </div>
             </CardContent>
