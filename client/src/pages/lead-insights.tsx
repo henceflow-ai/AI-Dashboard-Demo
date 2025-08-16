@@ -277,21 +277,7 @@ export default function LeadInsights() {
                     <p className="text-slate-600 dark:text-slate-400" data-testid="selected-lead-company">
                       {selectedLead.company || "No company"}
                     </p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Badge 
-                        className={`${getStageColor(selectedLead.stage)}`}
-                        data-testid="selected-lead-stage"
-                      >
-                        {selectedLead.stage}
-                      </Badge>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs ${getStatusColor(selectedLead.status)}`}
-                        data-testid="selected-lead-status"
-                      >
-                        {selectedLead.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
+                    
                   </div>
                 </div>
                 <Button variant="outline" onClick={() => refetch()} data-testid="refresh-data-button">
