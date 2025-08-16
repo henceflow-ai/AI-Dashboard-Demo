@@ -21,7 +21,9 @@ import {
   User,
   Menu,
   Moon,
-  Sun
+  Sun,
+  RefreshCw,
+  ExternalLink
 } from "lucide-react";
 import { useTheme } from "@/components/ui/theme-provider";
 import type { Lead } from "@shared/schema";
@@ -236,9 +238,7 @@ export default function LeadInsights() {
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate" data-testid={`lead-name-${index}`}>
                       {lead.name}
                     </p>
-                    {(lead.metadata as any)?.priority === "high" && (
-                      <Star className="h-3 w-3 text-amber-500 ml-1" data-testid={`lead-priority-${index}`} />
-                    )}
+
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate" data-testid={`lead-company-${index}`}>
                     {lead.company || "No company"}
@@ -284,11 +284,19 @@ export default function LeadInsights() {
                       >
                         {selectedLead.stage}
                       </Badge>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${getStatusColor(selectedLead.status)}`}
+                        data-testid="selected-lead-status"
+                      >
+                        {selectedLead.status.replace('_', ' ')}
+                      </Badge>
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" data-testid="edit-lead-button">
-                  Edit
+                <Button variant="outline" onClick={() => refetch()} data-testid="refresh-data-button">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh Data
                 </Button>
               </div>
 
@@ -303,7 +311,9 @@ export default function LeadInsights() {
                     <div className="flex items-center space-x-3" data-testid="contact-email">
                       <Mail className="h-4 w-4 text-slate-400" />
                       <span className="text-sm text-slate-600 dark:text-slate-400">Email</span>
-                      <span className="text-sm font-medium text-slate-900 dark:text-white">{selectedLead.email}</span>
+                      <span className="text-sm font-medium text-slate-900 dark:text-white">
+                        {((selectedLead.metadata as Record<string, any>)?.['Work Email'] as string) || selectedLead.email}
+                      </span>
                     </div>
                     {selectedLead.phone && (
                       <div className="flex items-center space-x-3" data-testid="contact-phone">
@@ -326,37 +336,50 @@ export default function LeadInsights() {
                         <span className="text-sm font-medium text-slate-900 dark:text-white">{selectedLead.source}</span>
                       </div>
                     )}
+                    {(selectedLead.metadata as Record<string, any>)?.['LinkedIn URL'] && (
+                      <div className="flex items-center space-x-3" data-testid="contact-linkedin">
+                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">LinkedIn</span>
+                        <a 
+                          href={(selectedLead.metadata as Record<string, any>)['LinkedIn URL'] as string} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          View Profile
+                        </a>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Lead Details */}
                 <Card className="bg-white dark:bg-slate-800" data-testid="lead-details-card">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardHeader>
                     <CardTitle className="text-lg text-slate-900 dark:text-white">Lead Details</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => refetch()}>
-                      Refresh Data
-                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {(selectedLead.metadata as any)?.firstName && (
+                    {(selectedLead.metadata as Record<string, any>)?.firstName && (
                       <div className="flex items-center space-x-3" data-testid="lead-firstname">
                         <User className="h-4 w-4 text-slate-400" />
                         <span className="text-sm text-slate-600 dark:text-slate-400">First Name</span>
-                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as any).firstName}</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as Record<string, any>).firstName}</span>
                       </div>
                     )}
-                    {(selectedLead.metadata as any)?.lastName && (
+                    {(selectedLead.metadata as Record<string, any>)?.lastName && (
                       <div className="flex items-center space-x-3" data-testid="lead-lastname">
                         <User className="h-4 w-4 text-slate-400" />
                         <span className="text-sm text-slate-600 dark:text-slate-400">Last Name</span>
-                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as any).lastName}</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">{(selectedLead.metadata as Record<string, any>).lastName}</span>
                       </div>
                     )}
-                    <div className="flex items-center space-x-3" data-testid="lead-created">
+                    <div className="flex items-center space-x-3" data-testid="lead-arrived">
                       <Calendar className="h-4 w-4 text-slate-400" />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Created</span>
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Lead Arrived Date</span>
                       <span className="text-sm font-medium text-slate-900 dark:text-white">
-                        {formatDate(selectedLead.createdAt)}
+                        {(selectedLead.metadata as Record<string, any>)?.['Lead Arrived At'] ? 
+                          formatDate(new Date((selectedLead.metadata as Record<string, any>)['Lead Arrived At'] as string)) : 
+                          formatDate(selectedLead.createdAt)}
                       </span>
                     </div>
                     {selectedLead.lastContactedAt && (
@@ -377,15 +400,7 @@ export default function LeadInsights() {
                         </span>
                       </div>
                     )}
-                    {(selectedLead.metadata as any)?.priority && (
-                      <div className="flex items-center space-x-3" data-testid="lead-priority">
-                        <Star className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm text-slate-600 dark:text-slate-400">Priority</span>
-                        <span className="text-sm font-medium text-slate-900 dark:text-white capitalize">
-                          {(selectedLead.metadata as any).priority}
-                        </span>
-                      </div>
-                    )}
+
                   </CardContent>
                 </Card>
               </div>
@@ -408,7 +423,7 @@ export default function LeadInsights() {
               {selectedLead.metadata && Object.keys(selectedLead.metadata).length > 0 && (
                 <Card className="bg-white dark:bg-slate-800" data-testid="airtable-data-card">
                   <CardHeader>
-                    <CardTitle className="text-lg text-slate-900 dark:text-white">All Airtable Data</CardTitle>
+                    <CardTitle className="text-lg text-slate-900 dark:text-white">Complete Lead Information</CardTitle>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       Live data from your L1 - Enriched Leads table
                     </p>
@@ -416,7 +431,8 @@ export default function LeadInsights() {
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {Object.entries(selectedLead.metadata)
-                        .filter(([key, value]) => value !== null && value !== undefined && value !== '')
+                        .filter(([key, value]) => value !== null && value !== undefined && value !== '' && 
+                          key !== 'priority' && key !== 'Summary')
                         .map(([key, value]) => (
                           <div key={key} className="flex items-start space-x-3" data-testid={`metadata-${key}`}>
                             <div className="min-w-0 flex-1">
@@ -424,7 +440,19 @@ export default function LeadInsights() {
                                 {key.replace(/_/g, ' ')}
                               </p>
                               <p className="text-sm font-medium text-slate-900 dark:text-white mt-1 break-words">
-                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                {key === 'LinkedIn URL' ? (
+                                  <a 
+                                    href={String(value)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+                                  >
+                                    {String(value)}
+                                    <ExternalLink className="h-3 w-3 ml-1" />
+                                  </a>
+                                ) : (
+                                  typeof value === 'object' ? JSON.stringify(value) : String(value)
+                                )}
                               </p>
                             </div>
                           </div>
