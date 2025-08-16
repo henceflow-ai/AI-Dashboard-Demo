@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { 
@@ -186,15 +186,9 @@ export default function NurtureCampaigns() {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              New Campaign
-            </Button>
-            <Button variant="ghost" size="sm" onClick={toggleTheme} className="p-2">
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={toggleTheme} className="p-2">
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
         </div>
       </header>
 
@@ -231,7 +225,7 @@ export default function NurtureCampaigns() {
                 <Mail className="h-5 w-5 text-orange-600" />
                 <div>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">{avgOpenRate.toFixed(1)}%</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Avg Open Rate</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Avg Response Rate</p>
                 </div>
               </div>
             </CardContent>
@@ -295,9 +289,16 @@ export default function NurtureCampaigns() {
                       <p className="text-sm text-slate-500 mt-1">{campaign.type}</p>
                     </div>
                   </div>
-                  <Badge className={getStatusColor(campaign.status)} variant="secondary">
-                    {campaign.status}
-                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      checked={campaign.status === "Active"} 
+                      disabled={campaign.status === "Draft"}
+                      data-testid={`campaign-toggle-${campaign.id}`}
+                    />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      {campaign.status === "Active" ? "Active" : "Paused"}
+                    </span>
+                  </div>
                 </div>
               </CardHeader>
               
@@ -353,32 +354,24 @@ export default function NurtureCampaigns() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700">
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      {campaign.status === "Active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  
-                  <Sheet>
-                    <SheetTrigger asChild>
+                <div className="flex items-center justify-end pt-3 border-t border-slate-200 dark:border-slate-700">
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => setSelectedCampaign(campaign)}
                         className="group-hover:bg-primary group-hover:text-primary-foreground"
+                        data-testid={`view-details-${campaign.id}`}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[800px] max-w-[90vw]">
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                       <CampaignDetailView campaign={selectedCampaign} />
-                    </SheetContent>
-                  </Sheet>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
@@ -398,9 +391,9 @@ function CampaignDetailView({ campaign }: { campaign: typeof mockCampaigns[0] | 
 
   return (
     <div className="space-y-6">
-      <SheetHeader>
-        <SheetTitle className="text-xl">{campaign.name}</SheetTitle>
-      </SheetHeader>
+      <DialogHeader>
+        <DialogTitle className="text-xl">{campaign.name}</DialogTitle>
+      </DialogHeader>
 
       {/* Campaign Summary */}
       <Card>
@@ -411,13 +404,14 @@ function CampaignDetailView({ campaign }: { campaign: typeof mockCampaigns[0] | 
               Campaign Overview
             </CardTitle>
             <div className="flex items-center space-x-3">
-              <Badge className={getStatusColor(campaign.status)}>
-                {campaign.status}
-              </Badge>
               <Switch 
                 checked={campaign.status === "Active"} 
                 disabled={campaign.status === "Draft"}
+                data-testid="campaign-detail-toggle"
               />
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                {campaign.status === "Active" ? "Active" : "Paused"}
+              </span>
             </div>
           </div>
         </CardHeader>
