@@ -84,12 +84,12 @@ const mockLeads = [
 
 // Funnel data for conversion visualization
 const funnelData = [
-  { stage: "Lead Enriched", count: 145, percentage: 100, color: "#3B82F6" }, // Blue
-  { stage: "AI Call Done", count: 98, percentage: 67.6, color: "#8B5CF6" }, // Purple
-  { stage: "Meeting Booked", count: 67, percentage: 46.2, color: "#10B981" }, // Green
-  { stage: "In Nurture", count: 45, percentage: 31.0, color: "#F59E0B" }, // Orange
-  { stage: "Meeting Finished", count: 34, percentage: 23.4, color: "#059669" }, // Darker Green
-  { stage: "Deal Won", count: 12, percentage: 8.3, color: "#34D399" } // Light Green
+  { stage: "Lead Enriched", count: 145, percentage: 100 },
+  { stage: "Initial AI Call Done", count: 89, percentage: 61.4 },
+  { stage: "Meeting Booked", count: 67, percentage: 46.2 },
+  { stage: "In Nurture Campaign", count: 45, percentage: 31.0 },
+  { stage: "Meeting Finished", count: 34, percentage: 23.4 },
+  { stage: "Deal Won", count: 18, percentage: 12.4 }
 ];
 
 export default function PipelineStages() {
@@ -118,11 +118,6 @@ export default function PipelineStages() {
     return <Icon className="h-5 w-5" />;
   };
 
-  const handleStageClick = (stageId: number, stageName: string) => {
-    setSelectedStage(selectedStage === stageId ? null : stageId);
-    setSelectedStageName(selectedStageName === stageName ? null : stageName);
-  };
-
   const getScoreColor = (score: string) => {
     switch (score) {
       case "Hot": return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
@@ -130,6 +125,11 @@ export default function PipelineStages() {
       case "Cold": return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400";
       default: return "bg-slate-100 text-slate-700 dark:bg-slate-900/20 dark:text-slate-400";
     }
+  };
+
+  const handleStageClick = (stageId: number, stageName: string) => {
+    setSelectedStage(stageId);
+    setSelectedStageName(stageName);
   };
 
   return (
@@ -207,63 +207,122 @@ export default function PipelineStages() {
 
         {/* Conversion Funnel Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-slate-900 dark:bg-slate-900 border-slate-700">
+          <Card className="bg-white dark:bg-slate-800">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
+              <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Conversion Funnel
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="relative py-8">
-                {/* Modern funnel blocks design inspired by the image */}
-                <div className="max-w-md mx-auto space-y-6">
-                  {funnelData.map((item, index) => {
-                    // Calculate dynamic widths for visual funnel effect
-                    const baseWidth = 100;
-                    const widthReduction = index * 8; // Gradual width reduction
-                    const blockWidth = Math.max(baseWidth - widthReduction, 45); // Minimum width
+              <div className="relative py-6">
+                {/* Clean, centered funnel design */}
+                <div className="max-w-2xl mx-auto">
+                  <svg width="100%" height="320" viewBox="0 0 400 320" className="mx-auto">
+                    {/* Clean funnel sections */}
+                    {funnelData.map((item, index) => {
+                      const colors = [
+                        '#FDE68A', // Light Yellow
+                        '#6EE7B7', // Light Green  
+                        '#93C5FD', // Light Blue
+                        '#F9A8D4', // Light Pink
+                        '#C4B5FD', // Light Purple
+                        '#FCA5A5'  // Light Red
+                      ];
+                      
+                      // Simplified funnel geometry
+                      const baseWidth = 280;
+                      const reduction = index * 35;
+                      const topWidth = baseWidth - reduction;
+                      const bottomWidth = baseWidth - (reduction + 35);
+                      const height = 40;
+                      const yPos = index * 35 + 20;
+                      
+                      return (
+                        <g key={index}>
+                          {/* Funnel section */}
+                          <path
+                            d={`M ${200 - topWidth/2} ${yPos} 
+                                L ${200 + topWidth/2} ${yPos} 
+                                L ${200 + bottomWidth/2} ${yPos + height} 
+                                L ${200 - bottomWidth/2} ${yPos + height} Z`}
+                            fill={colors[index]}
+                            stroke="#1F2937"
+                            strokeWidth="2"
+                            className="cursor-pointer transition-all duration-300 hover:opacity-80 hover:stroke-4"
+                            onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
+                            onMouseEnter={() => setHoveredFunnelStage(item.stage)}
+                            onMouseLeave={() => setHoveredFunnelStage(null)}
+                          />
+                          
+                          {/* Stage content */}
+                          <foreignObject x={200 - 60} y={yPos + 8} width="120" height="24">
+                            <div className="flex items-center justify-center text-slate-800 font-medium text-sm">
+                              {(() => {
+                                const IconComponent = pipelineStages.find(s => s.name === item.stage)?.icon || Users;
+                                return (
+                                  <div className="flex items-center space-x-2">
+                                    <IconComponent size={14} />
+                                    <span>{item.count}</span>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </foreignObject>
+                        </g>
+                      );
+                    })}
                     
-                    return (
-                      <div key={index} className="flex flex-col items-center">
-                        {/* Funnel Block */}
+                    {/* Funnel bottom outlet */}
+                    <rect
+                      x={200 - 20}
+                      y={250}
+                      width={40}
+                      height={25}
+                      fill="#FCA5A5"
+                      stroke="#1F2937"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                  
+                  {/* Stage labels below funnel */}
+                  <div className="mt-6 grid grid-cols-2 gap-4">
+                    {funnelData.map((item, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                        onClick={() => handleStageClick(pipelineStages.find(s => s.name === item.stage)?.id || 1, item.stage)}
+                      >
                         <div 
-                          className="rounded-lg py-4 px-6 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg relative"
+                          className="w-4 h-4 rounded-sm"
                           style={{ 
-                            backgroundColor: item.color,
-                            width: `${blockWidth}%`,
-                            minWidth: '200px'
+                            backgroundColor: ['#FDE68A', '#6EE7B7', '#93C5FD', '#F9A8D4', '#C4B5FD', '#FCA5A5'][index]
                           }}
-                          onClick={() => handleStageClick(pipelineStages.find(s => s.name.includes(item.stage.split(' ')[0]))?.id || index + 1, item.stage)}
-                          onMouseEnter={() => setHoveredFunnelStage(item.stage)}
-                          onMouseLeave={() => setHoveredFunnelStage(null)}
-                          data-testid={`funnel-block-${index}`}
-                        >
-                          <div className="text-center text-white">
-                            <h3 className="font-semibold text-lg mb-1">
-                              {item.stage}
-                            </h3>
-                            <p className="text-sm opacity-90">
-                              {item.count} leads ({item.percentage.toFixed(1)}%)
-                            </p>
-                          </div>
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                            {item.stage}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {item.count} leads • {item.percentage.toFixed(1)}%
+                          </p>
                         </div>
-                        
-                        {/* Dotted connector line (except for last item) */}
-                        {index < funnelData.length - 1 && (
-                          <div className="w-px h-8 border-l-2 border-dotted border-slate-500 my-2" />
-                        )}
+                        <div className="text-right">
+                          <span className="inline-flex items-center justify-center w-6 h-6 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-full text-xs font-medium">
+                            {index + 1}
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
                 
                 {/* Hover tooltip */}
                 {hoveredFunnelStage && (
                   <div className="absolute top-4 right-4 z-10">
-                    <div className="bg-white text-slate-900 px-3 py-2 rounded-lg text-sm shadow-lg border">
+                    <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 rounded-lg text-sm shadow-lg">
                       <p className="font-medium">{hoveredFunnelStage}</p>
-                      <p className="text-xs text-slate-600">
+                      <p className="text-xs opacity-90">
                         {funnelData.find(f => f.stage === hoveredFunnelStage)?.count} leads 
                         ({funnelData.find(f => f.stage === hoveredFunnelStage)?.percentage.toFixed(1)}%)
                       </p>
